@@ -91,33 +91,28 @@ namespace BoardAndBarber.Data
         public Customer Update(int id, Customer customer)
         {
             var query = @"UPDATE [dbo].[Customer]
-                             SET [Name] = <Name, varchar(100),>
-                            ,[Birthday] = <Birthday, datetime,>
-                            ,[FavoriteBarber] = <FavoriteBarber, varchar(100),>
-                            ,[Notes] = <Notes, varchar(2000),>
+                             SET [Name] = @name
+                            ,[Birthday] = @birthday
+                            ,[FavoriteBarber] = @favoriteBarber
+                            ,[Notes] = @notes
                             Output inserted.*
-                        WHERE <Search Conditions,,>";
+                        WHERE id = @id";
 
-            using var connection = new SqlConnection(_connectionString);
-            connection.Open();
+            using var db = new SqlConnection(_connectionString);
 
-            var command = connection.CreateCommand();
-            command.CommandText = query;
-
-            command.Parameters.AddWithValue("name", customer.Name);
-            command.Parameters.AddWithValue("birthday", customer.Birthday);
-            command.Parameters.AddWithValue("favoriteBarber", customer.FavoriteBarber);
-            command.Parameters.AddWithValue("notes", customer.Notes);
-            command.Parameters.AddWithValue("id", id);
-
-            var reader = command.ExecuteReader();
-
-            if(reader.Read())
+            var parameters = new
             {
-                return MapToCustomer(reader);
-            }
+                // You don't need to do it this way if your names match between your parameter and the object property on the right
+                Name = customer.Name,
+                Birthday = customer.Birthday,
+                FavoriteBarber = customer.FavoriteBarber,
+                Notes = customer.Notes,
+                id = id
+            };
 
-            return null;
+            var updatedCustomer = db.QueryFirstOrDefault<Customer>(query, parameters);
+
+            return updatedCustomer;
         }
 
         // DELETE METHOD
