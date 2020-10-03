@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
 using BoardAndBarber.Models;
+using Dapper;
 
 namespace BoardAndBarber.Data
 {
@@ -60,73 +61,30 @@ namespace BoardAndBarber.Data
         }
 
         // GET METHODS
-        public List<Customer> GetAll()
+        public IEnumerable<Customer> GetAll()
         {
-            using var connection = new SqlConnection(_connectionString);
+            using var db = new SqlConnection(_connectionString);
 
-            connection.Open();
-
-            var command = connection.CreateCommand();
             var query = "select * from Customer";
 
-            command.CommandText = query;
+            var customers = db.Query<Customer>(query);
 
-            var reader = command.ExecuteReader();
-            var customers = new List<Customer>();
-
-            while(reader.Read())
-            {
-                var customer = MapToCustomer(reader);
-                customers.Add(customer);
-            }
             return customers;
         }
 
-        public Customer GetById(int id)
+        public Customer GetById(int customerId)
         {
-            // the "Server-localhost..." can be replaced using the _connectionString
-            // field above
-            // I didn't do this because I wanted the example. It can be replaced
-            // after the next commit
-            using var connection = new SqlConnection("Server-localhost; Database-BoardAndBarber;Trusted_Connection-True;");
-            connection.Open();
+            using var db = new SqlConnection(_connectionString);
 
-            var command = connection.CreateCommand();
             var query = @"select *
                           from Customer
-                          where id = {id}";
-            command.CommandText = query;
+                          where id = @cid";
 
-            // run this query and I don't care about the results
-            //command.ExecuteNonQuery()
+            var parameters = new { cid = customerId };
 
-            // run this query, and only return the top row's leftmost column
-            // command.ExecuteScalar()
+            var customer = db.QueryFirstOrDefault<Customer>(query, parameters);
 
-            //run this query and give me the results, one row at a time
-            var reader = command.ExecuteReader();
-            //sql server has executed the command and is waiting to give us the results
-
-            if (reader.Read())
-            {
-                // this block can be replaced by the method above
-                // I did not replace this block with that method because I wanted the example here
-                // uploaded to github. It can be replaced after a commit.
-                var CustomerFromDb = new Customer();
-                // do something with the one result
-                CustomerFromDb.Id = (int)reader["id"];
-                CustomerFromDb.Name =
-                    reader["Name"] as string;
-                CustomerFromDb.Birthday = DateTime.Parse(reader["Birthday"].ToString());
-                CustomerFromDb.FavoriteBarber = reader["FavoriteBarber"].ToString();
-                CustomerFromDb.Notes = reader["Notes"].ToString();
-
-                return CustomerFromDb;
-            }
-            else
-            {
-                return null;
-            }
+            return customer;
         }
 
         // PUT METHOD

@@ -44,6 +44,16 @@ namespace BoardAndBarber.Controllers
             return Ok(allCustomers);
         }
 
+        [HttpGet("{id}")]
+        public IActionResult GetCustomerById(int id)
+        {
+            var customer = _repo.GetById(id);
+
+            if (customer == null) return NotFound("No customer with that id found.");
+
+            return Ok(customer);
+        }
+
         // PUT
         [HttpPut("{id}")]
         public IActionResult UpdateCustomer(int id, Customer customer)
