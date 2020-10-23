@@ -13,9 +13,6 @@ namespace BoardAndBarber.Controllers
     [ApiController]
     public class CustomersController : ControllerBase
     {
-        //properties
-        public object Id { get; private set; }
-
         // fields
         CustomerRepository _repo;
 
@@ -42,6 +39,16 @@ namespace BoardAndBarber.Controllers
             var allCustomers = _repo.GetAll();
 
             return Ok(allCustomers);
+        }
+
+        [HttpGet("{id}")]
+        public IActionResult GetCustomerById(int id)
+        {
+            var customer = _repo.GetById(id);
+
+            if (customer == null) return NotFound("No customer with that id found.");
+
+            return Ok(customer);
         }
 
         // PUT
