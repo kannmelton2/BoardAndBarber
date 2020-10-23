@@ -13,9 +13,6 @@ namespace BoardAndBarber.Controllers
     [ApiController]
     public class CustomersController : ControllerBase
     {
-        //properties
-        public object Id { get; private set; }
-
         // fields
         CustomerRepository _repo;
 

@@ -17,20 +17,6 @@ namespace BoardAndBarber.Data
 
 
     // methods
-    // private method to create Customer object when returning info from db
-    Customer MapToCustomer(SqlDataReader reader)
-        {
-            var CustomerFromDb = new Customer();
-            // do something with the one result
-            CustomerFromDb.Id = (int)reader["id"];
-            CustomerFromDb.Name =
-                reader["Name"] as string;
-            CustomerFromDb.Birthday = DateTime.Parse(reader["Birthday"].ToString());
-            CustomerFromDb.FavoriteBarber = reader["FavoriteBarber"].ToString();
-            CustomerFromDb.Notes = reader["Notes"].ToString();
-
-            return CustomerFromDb;
-        }
 
     // POST METHOD
     public void Add(Customer customerToAdd)
@@ -44,18 +30,9 @@ namespace BoardAndBarber.Data
                     VALUES
                         (@name,@birthday,@favoriteBarber,@notes)";
 
-            using var connection = new SqlConnection(_connectionString);
-            connection.Open();
+            using var db = new SqlConnection(_connectionString);
 
-            var command = connection.CreateCommand();
-            command.CommandText = query;
-
-            command.Parameters.AddWithValue("name", customerToAdd.Name);
-            command.Parameters.AddWithValue("birthday", customerToAdd.Birthday);
-            command.Parameters.AddWithValue("favoriteBarber", customerToAdd.FavoriteBarber);
-            command.Parameters.AddWithValue("notes", customerToAdd.Notes);
-
-            var newId = (int)command.ExecuteScalar();
+            var newId = db.ExecuteScalar<int>(query, customerToAdd);
 
             customerToAdd.Id = newId;
         }
@@ -122,18 +99,9 @@ namespace BoardAndBarber.Data
                           FROM [dbo].[Customer]
                           WHERE Id = @id";
 
-            using var connection = new SqlConnection(_connectionString);
-            connection.Open();
+            using var db = new SqlConnection(_connectionString);
 
-            var command = connection.CreateCommand();
-            command.CommandText = query;
-
-            command.Parameters.AddWithValue("id", customerId);
-
-            var rows = command.ExecuteNonQuery();
-
-            // then do an if statement, so if there's not a customerId passed in it does something?
-
+            db.Execute(query, new { id = customerId });
         }
     }
 }
