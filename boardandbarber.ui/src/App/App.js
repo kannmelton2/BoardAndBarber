@@ -1,11 +1,11 @@
 import './App.scss';
 
+import Customers from '../components/pages/Customers/Customers';
+
 function App() {
   return (
     <div className="App">
-      <header className="App-header">
-        <h1>Board and Barber</h1>
-      </header>
+      <Customers/>
     </div>
   );
 }
